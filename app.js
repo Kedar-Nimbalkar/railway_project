@@ -1,32 +1,517 @@
 class BOVBookingApp {
   constructor() {
+    this.currentRole = null;
     this.currentUser = null;
+    this.currentBooking = null;
+    this.vehicles = this.initializeVehicles();
     this.bookings = [];
-    this.vehicles = [];
-    this.queue = [];
-    this.init();
-  }
-
-  init() {
+    this.driverDutyActive = false;
+    
+    this.initializeEventListeners();
     this.loadFromStorage();
-    this.setupEventListeners();
-    this.initializeMockData();
-    this.checkAuthentication();
   }
 
-  setupEventListeners() {
-    // Landing page
-    document.getElementById('btn-traveler')?.addEventListener('click', () => this.navigateTo('login', { role: 'traveler' }));
-    document.getElementById('btn-driver')?.addEventListener('click', () => this.navigateTo('login', { role: 'driver' }));
+  // Initialize vehicles for the station
+  initializeVehicles() {
+    const vehicles = [];
+    for (let i = 1; i <= 7; i++) {
+      vehicles.push({
+        id: `BOV-${String(i).padStart(3, '0')}`,
+        status: 'available',
+        capacity: 4,
+        currentPlatform: Math.floor(Math.random() * 8) + 1,
+        driver: null,
+        bookings: []
+      });
+    }
+    return vehicles;
+  }
 
-    // Login form
-    document.getElementById('login-form')?.addEventListener('submit', (e) => this.handleLogin(e));
-    document.getElementById('back-to-role')?.addEventListener('click', () => this.showLoginStep(1));
+  // Initialize event listeners
+  initializeEventListeners() {
+    document.getElementById('btn-logout').addEventListener('click', () => this.logout());
+  }
 
-    // Demo accounts
-    document.querySelectorAll('.demo-account-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.handleDemoLogin(e.target.dataset.email));
-    });
+  // Select user role
+  selectRole(role) {
+    this.currentRole = role;
+    this.navigateTo('login');
+  }
+
+  // Validate PNR/UTS and proceed
+  validatePNRAndProceed() {
+    const pnrUts = document.getElementById('pnr-uts').value;
+    const travelType = document.getElementById('travel-type').value;
+    const fromPlatform = document.getElementById('from-platform').value;
+    const pwdCategory = document.getElementById('pwd-category').value;
+
+    if (!pnrUts || pnrUts.length !== 10) {
+      this.showAlert('Please enter a valid 10-digit number', 'error');
+      return;
+    }
+
+    if (!travelType || !fromPlatform || !pwdCategory) {
+      this.showAlert('Please fill all required fields', 'error');
+      return;
+    }
+
+    this.validationData = { pnrUts, travelType, fromPlatform, pwdCategory };
+    document.getElementById('login-step-1').style.display = 'none';
+    document.getElementById('login-step-2').style.display = 'block';
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step1').classList.add('completed');
+    document.getElementById('step2').classList.add('active');
+  }
+
+  // Back to step 1
+  backToStep1() {
+    document.getElementById('login-step-2').style.display = 'none';
+    document.getElementById('login-step-1').style.display = 'block';
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step1').classList.remove('completed');
+    document.getElementById('step1').classList.add('active');
+  }
+
+  // Complete registration
+  completeRegistration() {
+    const fullName = document.getElementById('full-name').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const destinationPlatform = document.getElementById('destination-platform').value;
+
+    if (!fullName || !phone || !email || !destinationPlatform) {
+      this.showAlert('Please fill all required fields', 'error');
+      return;
+    }
+
+    if (phone.length !== 10 || isNaN(phone)) {
+      this.showAlert('Please enter a valid 10-digit phone number', 'error');
+      return;
+    }
+
+    if (!this.validateEmail(email)) {
+      this.showAlert('Please enter a valid email address', 'error');
+      return;
+    }
+
+    this.currentUser = {
+      id: this.generateId(),
+      role: this.currentRole,
+      fullName,
+      phone,
+      email,
+      pnrUts: this.validationData.pnrUts,
+      travelType: this.validationData.travelType,
+      fromPlatform: this.validationData.fromPlatform,
+      destinationPlatform,
+      pwdCategory: this.validationData.pwdCategory,
+      isPWD: this.validationData.pwdCategory !== 'none',
+      createdAt: new Date().toISOString()
+    };
+
+    this.saveToStorage();
+    this.showAlert(`Welcome, ${fullName}!`, 'success');
+
+    if (this.currentRole === 'traveler') {
+      setTimeout(() => this.navigateTo('traveler-dashboard'), 500);
+    } else {
+      setTimeout(() => this.navigateTo('driver-dashboard'), 500);
+    }
+  }
+
+  // Start new booking
+  startNewBooking() {
+    const content = `
+      <div style="display: grid; gap: var(--space-20);">
+        <div>
+          <label style="display: block; margin-bottom: var(--space-8); font-weight: 600;">From Platform</label>
+          <select id="booking-from-platform" style="width: 100%; padding: var(--space-12); border: 1px solid var(--color-gray-300); border-radius: var(--radius-md);">
+            <option value="">Select...</option>
+            <option value="1">Platform 1</option>
+            <option value="2">Platform 2</option>
+            <option value="3">Platform 3</option>
+            <option value="4">Platform 4</option>
+            <option value="5">Platform 5</option>
+            <option value="6">Platform 6</option>
+            <option value="7">Platform 7</option>
+            <option value="8">Platform 8</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: var(--space-8); font-weight: 600;">To Platform</label>
+          <select id="booking-to-platform" style="width: 100%; padding: var(--space-12); border: 1px solid var(--color-gray-300); border-radius: var(--radius-md);">
+            <option value="">Select...</option>
+            <option value="1">Platform 1</option>
+            <option value="2">Platform 2</option>
+            <option value="3">Platform 3</option>
+            <option value="4">Platform 4</option>
+            <option value="5">Platform 5</option>
+            <option value="6">Platform 6</option>
+            <option value="7">Platform 7</option>
+            <option value="8">Platform 8</option>
+          </select>
+        </div>
+        <p class="text-xs" style="color: var(--color-gray-500); margin: 0;">
+          ${this.currentUser.isPWD ? '<strong>Your booking will be prioritized as a PWD passenger.</strong>' : ''}
+        </p>
+      </div>
+    `;
+
+    document.getElementById('booking-modal-content').innerHTML = content;
+
+    const modal = document.getElementById('booking-modal');
+    modal.classList.add('active');
+
+    const footer = document.createElement('div');
+    footer.className = 'modal-footer';
+    footer.innerHTML = `
+      <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="app.confirmNewBooking()">Confirm Booking</button>
+    `;
+
+    const existingFooter = modal.querySelector('.modal-footer');
+    if (existingFooter) existingFooter.remove();
+    modal.appendChild(footer);
+  }
+
+  // Confirm new booking
+  confirmNewBooking() {
+    const fromPlatform = document.getElementById('booking-from-platform').value;
+    const toPlatform = document.getElementById('booking-to-platform').value;
+
+    if (!fromPlatform || !toPlatform) {
+      this.showAlert('Please select both platforms', 'error');
+      return;
+    }
+
+    if (fromPlatform === toPlatform) {
+      this.showAlert('Source and destination platforms must be different', 'error');
+      return;
+    }
+
+    const availableVehicle = this.vehicles.find(v => v.status === 'available');
+    
+    if (!availableVehicle) {
+      this.showAlert('No vehicles available at the moment. Please try again later.', 'warning');
+      return;
+    }
+
+    const booking = {
+      id: this.generateId(),
+      userId: this.currentUser.id,
+      userName: this.currentUser.fullName,
+      vehicleId: availableVehicle.id,
+      fromPlatform,
+      toPlatform,
+      status: 'active',
+      isPWD: this.currentUser.isPWD,
+      pwdCategory: this.currentUser.pwdCategory,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      queuePosition: null
+    };
+
+    this.currentBooking = booking;
+    this.bookings.push(booking);
+    availableVehicle.status = 'assigned';
+    availableVehicle.currentBooking = booking;
+
+    this.saveToStorage();
+    this.closeModal();
+    this.showAlert('Booking confirmed! Vehicle assigned.', 'success');
+    this.refreshTravelerDashboard();
+  }
+
+  // Complete active booking
+  completeActiveBooking() {
+    if (!this.currentBooking) return;
+
+    const vehicle = this.vehicles.find(v => v.id === this.currentBooking.vehicleId);
+    if (vehicle) {
+      vehicle.status = 'available';
+      vehicle.currentBooking = null;
+    }
+
+    this.currentBooking.status = 'completed';
+    this.currentBooking.completedAt = new Date().toISOString();
+
+    this.saveToStorage();
+    this.showAlert('Booking completed successfully', 'success');
+    this.refreshTravelerDashboard();
+  }
+
+  // Cancel active booking
+  cancelActiveBooking() {
+    if (!this.currentBooking) return;
+
+    if (confirm('Are you sure you want to cancel this booking?')) {
+      const vehicle = this.vehicles.find(v => v.id === this.currentBooking.vehicleId);
+      if (vehicle) {
+        vehicle.status = 'available';
+        vehicle.currentBooking = null;
+      }
+
+      this.currentBooking.status = 'cancelled';
+      this.currentBooking = null;
+
+      this.saveToStorage();
+      this.showAlert('Booking cancelled', 'warning');
+      this.refreshTravelerDashboard();
+    }
+  }
+
+  // Toggle driver duty status
+  toggleDutyStatus() {
+    const btn = document.getElementById('duty-status-btn');
+    this.driverDutyActive = !this.driverDutyActive;
+
+    if (this.driverDutyActive) {
+      btn.textContent = 'End Duty';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-danger');
+      this.showAlert('Duty started', 'success');
+    } else {
+      btn.textContent = 'Start Duty';
+      btn.classList.remove('btn-danger');
+      btn.classList.add('btn-primary');
+      this.showAlert('Duty ended', 'info');
+    }
+
+    this.refreshDriverDashboard();
+  }
+
+  // Get sorted queue (PWD priority)
+  getSortedQueue() {
+    return this.bookings
+      .filter(b => b.status === 'active' && !b.userId.startsWith('driver'))
+      .sort((a, b) => {
+        if (a.isPWD && !b.isPWD) return -1;
+        if (!a.isPWD && b.isPWD) return 1;
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+  }
+
+  // Refresh traveler dashboard
+  refreshTravelerDashboard() {
+    document.getElementById('traveler-name').textContent = `PNR/UTS: ${this.currentUser.pnrUts}`;
+
+    const activeBooking = this.currentBooking || this.bookings.find(b => b.userId === this.currentUser.id && b.status === 'active');
+
+    if (activeBooking) {
+      document.getElementById('active-booking-section').style.display = 'block';
+      document.getElementById('active-booking-from').textContent = `Platform ${activeBooking.fromPlatform}`;
+      document.getElementById('active-booking-to').textContent = `Platform ${activeBooking.toPlatform}`;
+      document.getElementById('active-booking-vehicle').textContent = activeBooking.vehicleId;
+      this.currentBooking = activeBooking;
+    } else {
+      document.getElementById('active-booking-section').style.display = 'none';
+    }
+
+    const userBookings = this.bookings.filter(b => b.userId === this.currentUser.id);
+    const historyTable = document.getElementById('booking-history');
+    
+    if (userBookings.length === 0) {
+      historyTable.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-gray-500);">No booking history yet</td></tr>';
+    } else {
+      historyTable.innerHTML = userBookings.map(b => `
+        <tr>
+          <td><strong>${b.id}</strong></td>
+          <td>${new Date(b.createdAt).toLocaleDateString()} ${new Date(b.createdAt).toLocaleTimeString()}</td>
+          <td>Platform ${b.fromPlatform}</td>
+          <td>Platform ${b.toPlatform}</td>
+          <td><span class="badge ${b.status === 'completed' ? 'badge-success' : b.status === 'cancelled' ? 'badge-danger' : 'badge-info'}">${b.status}</span></td>
+          <td>${b.completedAt ? this.calculateDuration(b.createdAt, b.completedAt) : '-'}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  // Refresh driver dashboard
+  refreshDriverDashboard() {
+    document.getElementById('driver-name').textContent = `Driver: ${this.currentUser.fullName}`;
+    document.getElementById('vehicle-id').textContent = `BOV-001`;
+
+    const queue = this.getSortedQueue();
+
+    document.getElementById('stat-active').textContent = queue.length;
+    document.getElementById('stat-pwd').textContent = queue.filter(b => b.isPWD).length;
+    const completed = this.bookings.filter(b => b.status === 'completed' && new Date(b.completedAt).toDateString() === new Date().toDateString()).length;
+    document.getElementById('stat-completed').textContent = completed;
+
+    const queueContainer = document.getElementById('booking-queue');
+    
+    if (queue.length === 0) {
+      queueContainer.innerHTML = '<div style="text-align: center; padding: var(--space-48);"><p class="text-muted">No active bookings in queue</p></div>';
+    } else {
+      queueContainer.innerHTML = queue.map((b, index) => `
+        <div class="queue-item ${b.isPWD ? 'priority' : ''}">
+          <div class="queue-item-header">
+            <div class="queue-item-title">
+              <h3>Queue Position #${index + 1}</h3>
+              ${b.isPWD ? `<span class="badge badge-pwd">PWD Priority</span>` : ''}
+            </div>
+            <span class="status-badge status-pending">Waiting</span>
+          </div>
+          <div class="queue-item-details">
+            <div class="queue-item-detail">
+              <label>Passenger Name</label>
+              <value>${b.userName}</value>
+            </div>
+            <div class="queue-item-detail">
+              <label>From Platform</label>
+              <value>Platform ${b.fromPlatform}</value>
+            </div>
+            <div class="queue-item-detail">
+              <label>To Platform</label>
+              <value>Platform ${b.toPlatform}</value>
+            </div>
+            <div class="queue-item-detail">
+              <label>Request Time</label>
+              <value>${new Date(b.createdAt).toLocaleTimeString()}</value>
+            </div>
+          </div>
+          <div class="queue-item-actions">
+            <button class="btn btn-sm btn-success" onclick="app.acceptBooking('${b.id}')">Accept</button>
+            <button class="btn btn-sm btn-danger" onclick="app.rejectBooking('${b.id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Accept booking
+  acceptBooking(bookingId) {
+    const booking = this.bookings.find(b => b.id === bookingId);
+    if (booking) {
+      booking.status = 'in-progress';
+      this.saveToStorage();
+      this.showAlert(`Booking ${bookingId} accepted. Heading to Platform ${booking.fromPlatform}`, 'success');
+      this.refreshDriverDashboard();
+    }
+  }
+
+  // Reject booking
+  rejectBooking(bookingId) {
+    const booking = this.bookings.find(b => b.id === bookingId);
+    if (booking) {
+      booking.status = 'rejected';
+      const vehicle = this.vehicles.find(v => v.id === booking.vehicleId);
+      if (vehicle) {
+        vehicle.status = 'available';
+      }
+      this.saveToStorage();
+      this.showAlert('Booking rejected', 'warning');
+      this.refreshDriverDashboard();
+    }
+  }
+
+  // Navigate to page
+  navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+
+    const page = document.getElementById(pageId);
+    if (page) page.classList.add('active');
+
+    const header = document.getElementById('header');
+    if (pageId === 'landing-page') {
+      header.classList.add('hidden');
+    } else {
+      header.classList.remove('hidden');
+    }
+
+    if (pageId === 'traveler-dashboard') {
+      this.refreshTravelerDashboard();
+    } else if (pageId === 'driver-dashboard') {
+      this.refreshDriverDashboard();
+    }
+
+    if (pageId === 'login-page') {
+      document.getElementById('login-step-1').style.display = 'block';
+      document.getElementById('login-step-2').style.display = 'none';
+      document.getElementById('step1').classList.add('active');
+      document.getElementById('step1').classList.remove('completed');
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('login-form-step1').reset();
+      document.getElementById('login-form-step2').reset();
+    }
+  }
+
+  // Logout
+  logout() {
+    if (confirm('Are you sure you want to logout?')) {
+      this.currentUser = null;
+      this.currentBooking = null;
+      this.driverDutyActive = false;
+      this.currentRole = null;
+      sessionStorage.clear();
+      this.navigateTo('landing-page');
+      this.showAlert('Logged out successfully', 'info');
+    }
+  }
+
+  // Close modal
+  closeModal() {
+    document.getElementById('booking-modal').classList.remove('active');
+  }
+
+  // Show alert
+  showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = 'var(--space-20)';
+    alertDiv.style.right = 'var(--space-20)';
+    alertDiv.style.maxWidth = '400px';
+    alertDiv.style.zIndex = '2000';
+    alertDiv.innerHTML = `
+      <div class="alert-content">
+        <p>${message}</p>
+      </div>
+    `;
+
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 4000);
+  }
+
+  // Validate email
+  validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  // Generate ID
+  generateId() {
+    return 'ID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+  }
+
+  // Calculate duration
+  calculateDuration(startTime, endTime) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const diff = Math.floor((end - start) / 1000 / 60);
+    return `${diff} min`;
+  }
+
+  // Save to storage
+  saveToStorage() {
+    sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+    sessionStorage.setItem('bookings', JSON.stringify(this.bookings));
+    sessionStorage.setItem('vehicles', JSON.stringify(this.vehicles));
+  }
+
+  // Load from storage
+  loadFromStorage() {
+    const user = sessionStorage.getItem('currentUser');
+    const bookings = sessionStorage.getItem('bookings');
+    const vehicles = sessionStorage.getItem('vehicles');
+
+    if (user) this.currentUser = JSON.parse(user);
+    if (bookings) this.bookings = JSON.parse(bookings);
+    if (vehicles) this.vehicles = JSON.parse(vehicles);
+  }
+}
+
+const app = new BOVBookingApp();
 
     // Traveler form
     document.getElementById('booking-form')?.addEventListener('submit', (e) => this.handleBooking(e));

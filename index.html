@@ -8,19 +8,18 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="main-wrapper">
+  <div class="app-container">
     <!-- Header -->
-    <header class="header hidden" id="header">
+    <header class="header" id="header">
       <div class="container">
         <div class="header-content">
           <div class="header-logo">
-            <div class="header-logo-icon">HRS</div>
-            <div>BOV Booking System</div>
+            <div class="logo-icon">HRS</div>
+            <div class="logo-text">BOV Booking System</div>
           </div>
           <nav class="header-nav">
-            <a href="#" onclick="app.navigateTo('dashboard'); return false;">Dashboard</a>
             <div class="user-info" id="user-info"></div>
-            <button class="btn-logout" id="btn-logout">Logout</button>
+            <button class="btn-logout" id="btn-logout" onclick="app.logout()">Logout</button>
           </nav>
         </div>
       </div>
@@ -30,71 +29,71 @@
     <main class="main-content">
       <div class="container">
         <!-- Landing Page -->
-        <div id="landing-page" class="page active">
+        <section id="landing-page" class="page active">
           <div class="landing-hero">
-            <h1>Battery-Operated Vehicle Booking</h1>
-            <p>Professional transportation solution at Hubballi Railway Station with priority service for persons with disabilities</p>
+            <h1>Battery-Operated Vehicle Booking System</h1>
+            <p>Efficient and reliable transportation service at Hubballi Railway Station with priority service for persons with disabilities</p>
             <div class="hero-buttons">
               <button class="btn btn-primary btn-lg" onclick="app.selectRole('traveler')">Book a Ride</button>
-              <button class="btn btn-secondary btn-lg" onclick="app.selectRole('driver')">Driver Portal</button>
+              <button class="btn btn-secondary btn-lg" onclick="app.selectRole('driver')">Driver Login</button>
             </div>
           </div>
 
-          <div class="landing-features">
+          <div class="features-grid">
             <div class="feature-card">
-              <h3>PWD Priority Service</h3>
-              <p>Dedicated priority queue system for persons with disabilities ensuring priority booking and efficient service delivery.</p>
+              <h3>Priority Service for PWD</h3>
+              <p>Dedicated priority queue system ensuring persons with disabilities receive priority booking and service.</p>
             </div>
             <div class="feature-card">
-              <h3>Multi-Platform Coverage</h3>
-              <p>All 8 platforms at Hubballi Railway Station equipped with our BOV service for seamless station mobility.</p>
+              <h3>All 8 Platforms</h3>
+              <p>Comprehensive coverage across all platforms at Hubballi Railway Station for seamless mobility.</p>
             </div>
             <div class="feature-card">
               <h3>Real-Time Booking</h3>
-              <p>Simple two-step booking process with instant confirmation and vehicle assignment for your journey.</p>
+              <p>Simple and fast two-step booking process with instant confirmation and vehicle assignment.</p>
             </div>
             <div class="feature-card">
               <h3>Professional Fleet</h3>
-              <p>Well-maintained battery-operated vehicles managed by trained drivers for safe and reliable transportation.</p>
+              <p>Well-maintained battery-operated vehicles with trained drivers for safe and reliable transportation.</p>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Login Page -->
-        <div id="login-page" class="page">
+        <section id="login-page" class="page">
           <div class="login-container">
             <div class="login-header">
-              <h1>Access BOV Booking System</h1>
-              <p>Login or register to proceed</p>
+              <h1 id="login-title">Traveler Login</h1>
+              <p id="login-subtitle">Access your bookings</p>
             </div>
 
-            <div class="step-indicator">
+            <div class="step-indicator" id="step-indicator">
               <div class="step active" id="step1">1</div>
               <div class="step" id="step2">2</div>
             </div>
 
-            <!-- Step 1: PNR/UTS Validation -->
-            <div id="login-step-1" class="login-step">
-              <form id="login-form-step1">
+            <!-- Traveler Login - Step 1 -->
+            <div id="traveler-step-1" class="login-step">
+              <form onsubmit="app.handleTravelerStep1(event)">
                 <div class="form-group">
                   <label for="pnr-uts">PNR or UTS Number</label>
-                  <input type="text" id="pnr-uts" placeholder="Enter 10-digit number (e.g., 1234567890)" required maxlength="10">
-                  <small>10 digits for railway ticket validation</small>
+                  <input type="text" id="pnr-uts" placeholder="Enter 10-digit number" maxlength="10" required>
+                  <small>10-digit railway ticket validation number</small>
                 </div>
 
                 <div class="form-group">
                   <label for="travel-type">Travel Type</label>
                   <select id="travel-type" required>
-                    <option value="">Select travel type...</option>
-                    <option value="arrival">Arrival (Entering Station)</option>
-                    <option value="departure">Departure (Leaving Station)</option>
+                    <option value="">Select travel type</option>
+                    <option value="arrival">Arrival at Station</option>
+                    <option value="departure">Departure from Station</option>
                   </select>
                 </div>
 
                 <div class="form-group">
                   <label for="from-platform">Current Platform</label>
                   <select id="from-platform" required>
-                    <option value="">Select platform...</option>
+                    <option value="">Select platform</option>
                     <option value="1">Platform 1</option>
                     <option value="2">Platform 2</option>
                     <option value="3">Platform 3</option>
@@ -107,9 +106,9 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="pwd-category">Person with Disability Category</label>
+                  <label for="pwd-category">Disability Category</label>
                   <select id="pwd-category" required>
-                    <option value="">Select if applicable...</option>
+                    <option value="">Select if applicable</option>
                     <option value="none">No Disability</option>
                     <option value="visual">Visual Impairment</option>
                     <option value="hearing">Hearing Impairment</option>
@@ -119,13 +118,13 @@
                   </select>
                 </div>
 
-                <button type="button" class="btn btn-primary btn-block" onclick="app.validatePNRAndProceed()">Proceed to Registration</button>
+                <button type="submit" class="btn btn-primary btn-block">Proceed to Registration</button>
               </form>
             </div>
 
-            <!-- Step 2: Registration Details -->
-            <div id="login-step-2" class="login-step" style="display: none;">
-              <form id="login-form-step2">
+            <!-- Traveler Login - Step 2 -->
+            <div id="traveler-step-2" class="login-step" style="display: none;">
+              <form onsubmit="app.handleTravelerStep2(event)">
                 <div class="form-group">
                   <label for="full-name">Full Name</label>
                   <input type="text" id="full-name" placeholder="Enter your full name" required>
@@ -133,19 +132,18 @@
 
                 <div class="form-group">
                   <label for="phone">Phone Number</label>
-                  <input type="tel" id="phone" placeholder="Enter 10-digit phone number" required maxlength="10">
-                  <small>Indian mobile number (10 digits)</small>
+                  <input type="tel" id="phone" placeholder="10-digit phone number" maxlength="10" required>
                 </div>
 
                 <div class="form-group">
                   <label for="email">Email Address</label>
-                  <input type="email" id="email" placeholder="Enter email address" required>
+                  <input type="email" id="email" placeholder="your@email.com" required>
                 </div>
 
                 <div class="form-group">
                   <label for="destination-platform">Destination Platform</label>
                   <select id="destination-platform" required>
-                    <option value="">Select destination...</option>
+                    <option value="">Select destination</option>
                     <option value="1">Platform 1</option>
                     <option value="2">Platform 2</option>
                     <option value="3">Platform 3</option>
@@ -158,79 +156,80 @@
                 </div>
 
                 <div style="display: flex; gap: var(--space-16);">
-                  <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="app.backToStep1()">Back</button>
-                  <button type="button" class="btn btn-primary" style="flex: 1;" onclick="app.completeRegistration()">Complete Registration</button>
+                  <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="app.backToTravelerStep1()">Back</button>
+                  <button type="submit" class="btn btn-primary" style="flex: 1;">Register & Login</button>
                 </div>
               </form>
             </div>
+
+            <!-- Driver Login -->
+            <div id="driver-login" class="login-step" style="display: none;">
+              <form onsubmit="app.handleDriverLogin(event)">
+                <div class="form-group">
+                  <label for="driver-username">Driver ID / Username</label>
+                  <input type="text" id="driver-username" placeholder="Enter driver ID" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="driver-password">Password</label>
+                  <input type="password" id="driver-password" placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+                <div style="margin-top: var(--space-20); padding-top: var(--space-20); border-top: 1px solid var(--color-gray-300); text-align: center;">
+                  <p class="text-sm" style="margin-bottom: var(--space-12);">Demo Driver Credentials:</p>
+                  <p class="text-xs" style="color: var(--color-gray-500);">Username: driver1 | Password: pass123</p>
+                  <p class="text-xs" style="color: var(--color-gray-500);">Username: driver2 | Password: pass123</p>
+                </div>
+              </form>
+            </div>
+
+            <button class="btn-back" id="btn-back" onclick="app.backToLanding()" style="display: none;">Back to Home</button>
           </div>
-        </div>
+        </section>
 
         <!-- Traveler Dashboard -->
-        <div id="traveler-dashboard" class="page">
+        <section id="traveler-dashboard" class="page">
           <div class="dashboard-header">
-            <div class="dashboard-title">
+            <div>
               <h1>Booking Dashboard</h1>
-              <p class="text-muted" id="traveler-name"></p>
+              <p class="text-muted" id="traveler-info"></p>
             </div>
-            <div class="dashboard-actions">
-              <button class="btn btn-primary" onclick="app.startNewBooking()">New Booking</button>
-            </div>
+            <button class="btn btn-primary" onclick="app.startNewBooking()">New Booking</button>
           </div>
 
-          <!-- Active Booking -->
+          <!-- Active Booking Section -->
           <div id="active-booking-section" style="display: none; margin-bottom: var(--space-32);">
-            <h2 style="margin-bottom: var(--space-20);">Active Booking</h2>
+            <h2>Active Booking</h2>
             <div class="card">
-              <div class="card-content">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-24); margin-bottom: var(--space-24);">
-                  <div>
-                    <p class="text-xs">Status</p>
-                    <div class="status-badge status-active" id="active-booking-status">Active</div>
-                  </div>
-                  <div>
-                    <p class="text-xs">From Platform</p>
-                    <p style="font-weight: 600; font-size: 1.25rem;" id="active-booking-from"></p>
-                  </div>
-                  <div>
-                    <p class="text-xs">To Platform</p>
-                    <p style="font-weight: 600; font-size: 1.25rem;" id="active-booking-to"></p>
-                  </div>
-                  <div>
-                    <p class="text-xs">Assigned Vehicle</p>
-                    <p style="font-weight: 600; font-size: 1.25rem;" id="active-booking-vehicle"></p>
-                  </div>
+              <div class="booking-details">
+                <div class="detail-row">
+                  <span class="detail-label">Status</span>
+                  <span class="detail-value status-badge status-active">Active</span>
                 </div>
-                <div style="display: flex; gap: var(--space-12);">
-                  <button class="btn btn-success" onclick="app.completeActiveBooking()" style="flex: 1;">Complete Booking</button>
-                  <button class="btn btn-danger" onclick="app.cancelActiveBooking()" style="flex: 1;">Cancel Booking</button>
+                <div class="detail-row">
+                  <span class="detail-label">From Platform</span>
+                  <span class="detail-value" id="active-from-platform">-</span>
                 </div>
+                <div class="detail-row">
+                  <span class="detail-label">To Platform</span>
+                  <span class="detail-value" id="active-to-platform">-</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Vehicle ID</span>
+                  <span class="detail-value" id="active-vehicle-id">-</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: var(--space-12); margin-top: var(--space-20);">
+                <button class="btn btn-success" onclick="app.completeBooking()" style="flex: 1;">Complete Booking</button>
+                <button class="btn btn-danger" onclick="app.cancelBooking()" style="flex: 1;">Cancel Booking</button>
               </div>
             </div>
           </div>
 
-          <!-- Available Vehicles -->
-          <div id="available-vehicles-section" style="display: none; margin-bottom: var(--space-32);">
-            <h2 style="margin-bottom: var(--space-20);">Available Vehicles</h2>
-            <div class="table-responsive">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Vehicle ID</th>
-                    <th>Status</th>
-                    <th>Capacity</th>
-                    <th>Current Location</th>
-                    <th>Driver</th>
-                  </tr>
-                </thead>
-                <tbody id="available-vehicles-list">
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <!-- Booking History -->
-          <h2 style="margin-bottom: var(--space-20);">Booking History</h2>
+          <h2>Booking History</h2>
           <div class="card">
             <div class="table-responsive">
               <table>
@@ -245,74 +244,103 @@
                   </tr>
                 </thead>
                 <tbody id="booking-history">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--color-gray-500);">No bookings yet</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Driver Dashboard -->
-        <div id="driver-dashboard" class="page">
+        <section id="driver-dashboard" class="page">
           <div class="dashboard-header">
-            <div class="dashboard-title">
+            <div>
               <h1>Driver Portal</h1>
-              <p class="text-muted" id="driver-name"></p>
+              <p class="text-muted" id="driver-info"></p>
             </div>
-            <div class="dashboard-actions">
-              <span style="padding: var(--space-12) var(--space-16); background: var(--color-gray-100); border-radius: var(--radius-md);">
-                <span class="text-xs" style="display: block; color: var(--color-gray-600);">Vehicle ID</span>
-                <span style="font-weight: 600;" id="vehicle-id"></span>
-              </span>
-              <button class="btn btn-primary" id="duty-status-btn" onclick="app.toggleDutyStatus()">Start Duty</button>
-            </div>
+            <button class="btn btn-primary" id="duty-btn" onclick="app.toggleDutyStatus()">Start Duty</button>
           </div>
 
           <!-- Statistics -->
-          <div class="grid grid-3" style="margin-bottom: var(--space-32);">
-            <div class="card">
-              <div class="card-content">
-                <p class="text-xs" style="margin-bottom: var(--space-8);">Active Bookings</p>
-                <p style="font-size: 2rem; font-weight: 700; margin: 0;" id="stat-active">0</p>
-              </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Active Bookings</div>
+              <div class="stat-value" id="stat-active">0</div>
             </div>
-            <div class="card">
-              <div class="card-content">
-                <p class="text-xs" style="margin-bottom: var(--space-8);">PWD Priority</p>
-                <p style="font-size: 2rem; font-weight: 700; margin: 0; color: var(--color-warning);" id="stat-pwd">0</p>
-              </div>
+            <div class="stat-card">
+              <div class="stat-label">PWD Priority</div>
+              <div class="stat-value" id="stat-pwd">0</div>
             </div>
-            <div class="card">
-              <div class="card-content">
-                <p class="text-xs" style="margin-bottom: var(--space-8);">Completed Today</p>
-                <p style="font-size: 2rem; font-weight: 700; margin: 0; color: var(--color-success);" id="stat-completed">0</p>
-              </div>
+            <div class="stat-card">
+              <div class="stat-label">Completed Today</div>
+              <div class="stat-value" id="stat-completed">0</div>
             </div>
           </div>
 
           <!-- Booking Queue -->
-          <h2 style="margin-bottom: var(--space-20);">Booking Queue</h2>
+          <h2>Booking Queue</h2>
           <div id="booking-queue">
-            <div style="text-align: center; padding: var(--space-48);">
-              <p class="text-muted">No active bookings in queue</p>
+            <div style="text-align: center; padding: var(--space-48); color: var(--color-gray-500);">
+              <p>No active bookings in queue</p>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   </div>
 
   <!-- Booking Modal -->
-  <div class="modal-overlay" id="booking-modal">
-    <div class="modal">
+  <div class="modal-overlay" id="booking-modal" onclick="app.closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h2>New Booking Request</h2>
-        <button class="modal-close" onclick="app.closeModal()"></button>
+        <button class="modal-close" onclick="app.closeModal()">&times;</button>
       </div>
-      <div class="modal-content">
-        <div id="booking-modal-content"></div>
+      <div class="modal-body">
+        <form onsubmit="app.confirmBooking(event)">
+          <div class="form-group">
+            <label for="booking-from">From Platform</label>
+            <select id="booking-from" required>
+              <option value="">Select platform</option>
+              <option value="1">Platform 1</option>
+              <option value="2">Platform 2</option>
+              <option value="3">Platform 3</option>
+              <option value="4">Platform 4</option>
+              <option value="5">Platform 5</option>
+              <option value="6">Platform 6</option>
+              <option value="7">Platform 7</option>
+              <option value="8">Platform 8</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="booking-to">To Platform</label>
+            <select id="booking-to" required>
+              <option value="">Select platform</option>
+              <option value="1">Platform 1</option>
+              <option value="2">Platform 2</option>
+              <option value="3">Platform 3</option>
+              <option value="4">Platform 4</option>
+              <option value="5">Platform 5</option>
+              <option value="6">Platform 6</option>
+              <option value="7">Platform 7</option>
+              <option value="8">Platform 8</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: var(--space-12);">
+            <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="app.closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Confirm Booking</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+
+  <!-- Alert Container -->
+  <div id="alerts-container"></div>
 
   <script src="app.js"></script>
 </body>

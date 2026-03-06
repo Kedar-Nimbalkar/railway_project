@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hubballi Railway Station - BOV Booking System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header" id="header" style="display: none;">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-title">
+          <span>🚂</span>
+          <span>Hubballi Railway Station BOV</span>
+        </div>
+        <div class="header-nav">
+          <a href="#" onclick="window.app.navigateTo('traveler-dashboard'); return false;">Dashboard</a>
+          <div class="user-info"></div>
+          <button class="btn-logout" id="btn-logout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+      <div class="landing-hero">
+        <h1>🚐 Battery-Operated Vehicle Booking</h1>
+        <p>Convenient and eco-friendly transportation at Hubballi Railway Station</p>
+        <div class="hero-buttons">
+          <button id="btn-traveler" class="btn btn-primary btn-large">Book a Ride</button>
+          <button id="btn-driver" class="btn btn-secondary btn-large">Driver Login</button>
+        </div>
+      </div>
+
+      <div class="landing-features">
+        <div class="feature-box">
+          <div class="feature-icon">⭐</div>
+          <h3>PWD Priority</h3>
+          <p>Persons with disabilities get priority booking with dedicated support</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">🌱</div>
+          <h3>Eco-Friendly</h3>
+          <p>Electric vehicles that are clean and environment-friendly</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">⚡</div>
+          <h3>Quick Booking</h3>
+          <p>Simple platform-to-platform booking in just 2 steps</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">🚂</div>
+          <h3>Station Coverage</h3>
+          <p>8 platforms covered with comprehensive vehicle fleet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="page">
+      <div class="login-container">
+        <div class="login-header">
+          <h1>🚂</h1>
+          <h1>Login</h1>
+          <p>Book your ride or login as driver</p>
+        </div>
+
+        <div class="step-indicator">
+          <div class="step">1</div>
+          <div class="step">2</div>
+        </div>
+
+        <!-- Step 1: PNR/UTS Validation -->
+        <div id="login-step-1">
+          <form id="login-form">
+            <div class="form-group">
+              <label for="pnr-uts">PNR or UTS Number *</label>
+              <input type="text" id="pnr-uts" placeholder="Enter 10-digit PNR or UTS (e.g., 1234567890)" required>
+              <small style="color: var(--text-secondary);">10 digits or format AB12345678</small>
+            </div>
+
+            <div class="form-group">
+              <label for="travel-type">Travel Type *</label>
+              <select id="travel-type" required>
+                <option value="">Select...</option>
+                <option value="arrival">Arrival (Entering station)</option>
+                <option value="departure">Departure (Leaving station)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="from-platform">Current Platform (1-8) *</label>
+              <select id="from-platform" required>
+                <option value="">Select platform...</option>
+                <option value="1">Platform 1</option>
+                <option value="2">Platform 2</option>
+                <option value="3">Platform 3</option>
+                <option value="4">Platform 4</option>
+                <option value="5">Platform 5</option>
+                <option value="6">Platform 6</option>
+                <option value="7">Platform 7</option>
+                <option value="8">Platform 8</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large">Continue</button>
+          </form>
+
+          <div class="demo-mode-banner">
+            <strong>Demo Mode:</strong> Use any 10-digit number or format like AB12345678
+          </div>
+
+          <div class="demo-accounts">
+            <h4>Quick Demo Login</h4>
+            <button type="button" class="demo-account-btn" data-email="traveler1@demo.com">
+              👤 Rajesh Kumar (PWD) - Traveler
+            </button>
+            <button type="button" class="demo-account-btn" data-email="traveler2@demo.com">
+              👤 Priya Singh - Traveler
+            </button>
+            <button type="button" class="demo-account-btn" data-email="driver1@demo.com">
+              🚗 Suresh Kumar - Driver
+            </button>
+            <button type="button" class="demo-account-btn" data-email="driver2@demo.com">
+              🚗 Vijaykumar - Driver
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Account Details -->
+        <div id="login-step-2" class="hidden">
+          <form id="login-form" onsubmit="document.getElementById('login-form').dispatchEvent(new Event('submit'));">
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" placeholder="10-digit mobile number" required>
+              <small style="color: var(--text-secondary);">Enter valid Indian mobile number (10 digits)</small>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="is-disabled">
+                I am a Person with Disability (PWD)
+              </label>
+              <small style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                Persons with disabilities get priority booking
+              </small>
+            </div>
+
+            <div class="form-buttons">
+              <button type="button" id="back-to-role" class="btn btn-outline">Back</button>
+              <button type="submit" class="btn btn-primary">Create Account & Login</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traveler Dashboard -->
+    <div id="traveler-dashboard-page" class="page">
+      <div class="dashboard-grid">
+        <!-- Booking Form -->
+        <div class="booking-form">
+          <h2 style="margin-bottom: 20px;">New Booking</h2>
+          <form id="booking-form">
+            <div class="form-group">
+              <label>Select Your Current Platform *</label>
+              <div class="platform-selector">
+                <button type="button" class="platform-btn" data-platform="1">1</button>
+                <button type="button" class="platform-btn" data-platform="2">2</button>
+                <button type="button" class="platform-btn" data-platform="3">3</button>
+                <button type="button" class="platform-btn" data-platform="4">4</button>
+                <button type="button" class="platform-btn" data-platform="5">5</button>
+                <button type="button" class="platform-btn" data-platform="6">6</button>
+                <button type="button" class="platform-btn" data-platform="7">7</button>
+                <button type="button" class="platform-btn" data-platform="8">8</button>
+              </div>
+              <small style="color: var(--text-secondary);">Click on your current platform number</small>
+            </div>
+
+            <div class="form-group">
+              <label for="to-platform">Destination Platform *</label>
+              <select id="to-platform" onchange="window.app.selectToPlatform(this.value)" required>
+                <option value="">Select destination...</option>
+                <option value="1">Platform 1</option>
+                <option value="2">Platform 2</option>
+                <option value="3">Platform 3</option>
+                <option value="4">Platform 4</option>
+                <option value="5">Platform 5</option>
+                <option value="6">Platform 6</option>
+                <option value="7">Platform 7</option>
+                <option value="8">Platform 8</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large">Book Now</button>
+          </form>
+        </div>
+
+        <!-- Booking History -->
+        <div>
+          <h2 style="margin-bottom: 20px;">My Bookings</h2>
+          <div id="booking-list" class="booking-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Driver Dashboard -->
+    <div id="driver-dashboard-page" class="page">
+      <div class="driver-header">
+        <h1>Driver Portal</h1>
+        <div style="font-size: 18px; color: var(--text-secondary);">
+          Manage Your Bookings & Routes
+        </div>
+      </div>
+
+      <div class="vehicle-card" id="vehicle-card">
+        <!-- Vehicle info will be populated here -->
+      </div>
+
+      <div id="queue-list">
+        <!-- Queue items will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+      <div id="confirmation-content"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal="confirmation-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

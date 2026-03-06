@@ -1152,7 +1152,7 @@ table tbody tr:hover {
 .modal-body {
   padding: var(--space-24);
 }
-
+ 
 /* Back Button */
 .btn-back {
   display: inline-flex;
